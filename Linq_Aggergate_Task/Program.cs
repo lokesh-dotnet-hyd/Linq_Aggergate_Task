@@ -67,7 +67,7 @@ class Program
 
 
         //2.Calculate and display the average order amount for people older than 30.
-        var peopewith30=orders.Join(people.Where(p => p.Age > 30),o=> o.OrderId, p=>p.Id,(o,p)=>o.Amount).Average();
+        var peopewith30=orders.Join(people.Where(p => p.Age > 30),o=> o.PersonId, p=>p.Id,(o,p)=>o.Amount).Average();
         Console.WriteLine("The average order amount for people older than 30");
         Console.WriteLine(peopewith30);
         Console.WriteLine();
@@ -156,14 +156,14 @@ class Program
                   p => p.Id,
                   (o, p) => new { p.Name, Order = o })
             .GroupBy(x => x.Name)
-            .ToDictionary(g => g.Key, g => g.Select(x => x.Order).ToList());
+            .ToDictionary(g => g.Key, g => g.Count());
 
         Console.WriteLine("Number of orders per person:");
         Console.WriteLine("Person\tOrderCount");
 
         foreach (var entry in orderDictionary)
         {
-            Console.WriteLine($"{entry.Key}\t{entry.Value.Count}");
+            Console.WriteLine($"{entry.Key}\t{entry.Value}");
         }
         Console.WriteLine();
     }
