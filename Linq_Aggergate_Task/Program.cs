@@ -48,14 +48,64 @@ class Program
     {
         //1.Display the total number of orders and sum of order amounts for each person.
 
-        //2.Calculate and display the average order amount for people older than 30.
+        var orderSummary = orders
+                .GroupBy(o => o.PersonId)
+                .Select(g => new
+                {
+                    PersonId = g.Key,
+                    TotalOrders = g.Count(),
+                    TotalAmount = g.Sum(o => o.Amount)
+                });
+        Console.WriteLine("The total number of orders and sum of order amounts for each person are:");
+        Console.WriteLine("PersonId\tTotalOrders\tTotalAmount");
+        foreach(var summary in orderSummary)
+        {
+            Console.WriteLine(summary.PersonId+"\t\t"+summary.TotalOrders+"\t\t"+summary.TotalAmount);
 
-        // 3. display Minimum order amount  of each  person
-        
+        }
+        Console.WriteLine();
+
+
+        //2.Calculate and display the average order amount for people older than 30.
+        var peopewith30=orders.Join(people.Where(p => p.Age > 30),o=> o.OrderId, p=>p.Id,(o,p)=>o.Amount).Average();
+        Console.WriteLine("The average order amount for people older than 30");
+        Console.WriteLine(peopewith30);
+        Console.WriteLine();
+
+        var minorderamt = orders.GroupBy(p => p.PersonId).Select(g => (
+        new { PersonId = g.Key, amt = g.Min(x => x.Amount) }));
+        Console.WriteLine("Minimum Order Amount of each person is");
+        Console.WriteLine("PersonId\tTotalAmount");
+        foreach (var summary in minorderamt)
+        {
+            Console.WriteLine(summary.PersonId + "\t\t" + summary.amt);
+
+        }
+        Console.WriteLine();
 
         // 4. Display Maximum order amount of each person
 
+         var maxorderamt=orders.GroupBy(o=>o.PersonId).Select(g => (new {PersonID=g.Key, amt = g.Max(x => x.Amount) }));
+        Console.WriteLine("Maximun Order Amount of each person is");
+        Console.WriteLine("PersonId\tTotalAmount");
+        foreach (var summary in minorderamt)
+        {
+            Console.WriteLine(summary.PersonId + "\t\t" + summary.amt);
+
+        }
+        Console.WriteLine();
+
+
         //5.  Average order amount of each person
+        var avgorderamt=orders.GroupBy(o=>o.PersonId).Select(g=> (new {PersonID=g.Key,avg=g.Average(x => x.Amount) }));
+        Console.WriteLine("Average Order Amount of each person is");
+        Console.WriteLine("PersonId\tTotalAmount");
+        foreach (var summary in minorderamt)
+        {
+            Console.WriteLine(summary.PersonId + "\t\t" + summary.amt);
+
+        }
+        Console.WriteLine();
     }
 
 
@@ -63,28 +113,60 @@ class Program
     {
 
         //Find and display the single order placed on a specific date(e.g., March 5, 2025).
+        var singleorder = orders.SingleOrDefault(x=>x.OrderDate == new DateTime(2025,3,5));
+        Console.WriteLine("the single order placed on a specific date(e.g., March 5, 2025)");
+        Console.WriteLine("OrderId");
+        Console.WriteLine(singleorder.OrderId);
+        Console.WriteLine();
 
         //Find and display the first order with an amount greater than 150, or show a message if none exist.
+        var firstorder = orders.FirstOrDefault(x => x.Amount>150);
+        Console.WriteLine("the first order with an amount greater than 150");
+        Console.WriteLine("OrderId");
+        Console.WriteLine(firstorder.OrderId);
+        Console.WriteLine();
+
     }
 
     // 3. Quantifier operators - check if all have orders, any order above 250
     static void PerformQuantifierOperations(List<Person> people, List<Order> orders)
     {
-        //Check if all people have placed at least one order.
+        // Check if all people have at least one order
+        bool allHaveOrders = people.All(p => orders.Any(o => o.PersonId == p.Id));
+        Console.WriteLine("Are all people have at least one order");
+        Console.WriteLine(allHaveOrders
+            ? "True"
+            : "False");
 
-        //Check if any order has an amount greater than 250.
+        // Check if any order is greater than 250
+        bool anyLargeOrder = orders.Any(o => o.Amount > 250);
+        Console.WriteLine("Is  any order is greater than 250");
+        Console.WriteLine(anyLargeOrder
+            ? "True"
+            : "False");
     }
+
 
 
     static void PerformCollectionConversion(List<Person> people, List<Order> orders)
     {
-        //Convert your list of orders into a Dictionary, where:
+        var orderDictionary = orders
+            .Join(people,
+                  o => o.PersonId,
+                  p => p.Id,
+                  (o, p) => new { p.Name, Order = o })
+            .GroupBy(x => x.Name)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.Order).ToList());
 
-        //The key is the person’s name.
+        Console.WriteLine("Number of orders per person:");
+        Console.WriteLine("Person\tOrderCount");
 
-        //The value is a list of their orders.
-
-        //Display the number of orders each person has.
+        foreach (var entry in orderDictionary)
+        {
+            Console.WriteLine($"{entry.Key}\t{entry.Value.Count}");
+        }
+        Console.WriteLine();
     }
+
 }
 
